@@ -4,8 +4,8 @@ services:
   reverse_proxy:
     image: dockersamples/atseasampleshopapp_reverse_proxy
     ports:
-      - "80:80"
-      - "443:443"
+      - "3080:80"
+      - "3443:443"
     secrets:
       - source: revprox_cert
         target: revprox_cert
@@ -24,10 +24,6 @@ services:
       - back-tier
     secrets:
       - postgres_password
-    deploy:
-      placement:
-        constraints:
-          - 'node.role == worker'
 
   appserver:
     image: dockersamples/atsea_app
@@ -40,9 +36,6 @@ services:
       update_config:
         parallelism: 2
         failure_action: rollback
-      placement:
-        constraints:
-          - 'node.role == worker'
       restart_policy:
         condition: on-failure
         delay: 5s
@@ -54,16 +47,13 @@ services:
   visualizer:
     image: dockersamples/visualizer:stable
     ports:
-      - "8001:8080"
+      - "3081:8080"
     stop_grace_period: 1m30s
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
     deploy:
       update_config:
         failure_action: rollback
-      placement:
-        constraints:
-          - 'node.role == manager'
 
   payment_gateway:
     image: dockersamples/atseasampleshopapp_payment_gateway
@@ -75,10 +65,6 @@ services:
     deploy:
       update_config:
         failure_action: rollback
-      placement:
-        constraints:
-          - 'node.role == worker'
-          - 'node.labels.pcidss == yes'
 
 networks:
   front-tier:
