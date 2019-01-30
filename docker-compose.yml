@@ -8,14 +8,14 @@ services:
     user: postgres
     environment:
       POSTGRES_USER: gordonuser
-      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres-password
       POSTGRES_DB: atsea
     ports:
       - "5432:5432" 
     networks:
       - back-tier
     secrets:
-      - postgres_password
+      - postgres-password
 
   appserver:
     build:
@@ -30,15 +30,15 @@ services:
       - front-tier
       - back-tier
     secrets:
-      - postgres_password
+      - postgres-password
 
-  payment_gateway:
+  payment-gateway:
     build:
       context: payment_gateway
     networks:
       - payment
     secrets:
-      - payment_token
+      - payment-token
 
 networks:
   front-tier:
@@ -47,7 +47,7 @@ networks:
     driver: overlay
 
 secrets:
-  postgres_password:
+  postgres-password:
     file: ./devsecrets/postgres_password
-  payment_token:
+  payment-token:
     file: ./devsecrets/payment_token

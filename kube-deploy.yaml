@@ -1,0 +1,133 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-password
+type: Opaque
+stringData:
+  postgres_password: gordonpass
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: appserver
+  namespace: default
+  labels:
+    com.docker.service.id: atsea-appserver
+    com.docker.service.name: appserver
+    com.docker.stack.namespace: atsea
+spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        com.docker.service.id: atsea-appserver
+        com.docker.service.name: appserver
+        com.docker.stack.namespace: atsea
+    template:
+      metadata:
+        labels:
+          com.docker.service.id: atsea-appserver
+          com.docker.service.name: appserver
+          com.docker.stack.namespace: atsea          
+      spec:
+        containers:
+        - image: atsea_app
+          name: appserver
+          imagePullPolicy: Never
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          - containerPort: 5005
+            protocol: TCP
+        restartPolicy: Always
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    com.docker.service.id: atsea-database
+    com.docker.service.name: database
+    com.docker.stack.namespace: atsea
+  name: database
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      com.docker.service.id: atsea-database
+      com.docker.service.name: database
+      com.docker.stack.namespace: atsea
+  template:
+    metadata:
+      labels:
+        com.docker.service.id: atsea-database
+        com.docker.service.name: database
+        com.docker.stack.namespace: atsea
+    spec:
+      containers:
+      - 
+        env:
+        - name: POSTGRES_DB
+          value: atsea
+        - name: POSTGRES_PASSWORD_FILE
+          value: /run/secrets/postgres-password/postgres_password
+        - name: POSTGRES_USER
+          value: gordonuser
+        image: atsea_db
+        imagePullPolicy: Never
+        name: database
+        ports:
+        - containerPort: 5432
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /run/secrets/postgres-password
+          name: secret-0
+          readOnly: true
+      restartPolicy: Always
+      volumes:
+      - name: secret-0
+        secret:
+          # defaultMode: 420
+          # items:
+          # - key: C:\demo\atsea\devsecrets\postgres_password
+          #   path: secret-0
+          secretName: postgres-password
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    com.docker.service.id: atsea-database
+    com.docker.service.name: database
+    com.docker.stack.namespace: atsea
+  name: database
+  namespace: default
+spec:
+  ports:
+  - port: 5432
+    protocol: TCP
+    targetPort: 5432
+  selector:
+    com.docker.service.id: atsea-database
+    com.docker.service.name: database
+    com.docker.stack.namespace: atsea
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    com.docker.service.id: atsea-appserver
+    com.docker.service.name: appserver
+    com.docker.stack.namespace: atsea
+  name: appserver
+  namespace: default
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+    nodePort: 30080
+  selector:
+    com.docker.service.id: atsea-appserver
+    com.docker.service.name: appserver
+    com.docker.stack.namespace: atsea
+  type: NodePort
