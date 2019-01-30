@@ -11,7 +11,7 @@ RUN mvn -B -f pom.xml -s /usr/share/maven/ref/settings-docker.xml dependency:res
 COPY . .
 RUN mvn -B -s /usr/share/maven/ref/settings-docker.xml package -DskipTests
 
-FROM java:8-jdk-alpine
+FROM openjdk:8-jdk-alpine
 RUN adduser -Dh /home/gordon gordon
 WORKDIR /static
 COPY --from=storefront /usr/src/atsea/app/react-app/build/ .
