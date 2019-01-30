@@ -1,46 +1,30 @@
-DOCKER_IMAGE_TAG = "${env.BUILD_TIMESTAMP}${env.DOCKER_IMAGE_TAG_SUFFIX}"
+/* branch name is env.BRANCH_NAME */
+
+DOCKER_IMAGE_TAG = "${env.BUILD_TIMESTAMP}"
 
 node {
     def docker_image
 
-    stage('Validate Environment') {
-        required_env = [ 'DOCKER_IMAGE_NAMESPACE_DEV',
-                         'DOCKER_IMAGE_NAMESPACE_PROD',
-                         'DOCKER_IMAGE_APP_REPOSITORY',
-                         'DOCKER_IMAGE_DB_REPOSITORY',
-                         'DOCKER_IMAGE_TAG_SUFFIX',
-                         'DOCKER_REGISTRY_HOSTNAME',
-                         'DOCKER_REGISTRY_URI',
-                         'DOCKER_REGISTRY_CREDENTIALS_ID',
-                         'DOCKER_UCP_URI',
-                         'DOCKER_KUBE_NAMESPACE_DEV',
-                         'DOCKER_KUBE_NAMESPACE_PROD' ]
-
-
-        fail = 0
-
-        required_env.each { required ->
-            if(env[required] == null) {
-                fail = 1
-                echo "Missing required environment variable: '${required}'" 
-            }
-        }
-
-        if(fail) {
-            error("Missing required environment variables")
+    stage('Initialise Environment') {
+        environment {
+            DOCKER_IMAGE_NAMESPACE_DEV      = "${env.BRANCH_NAME}-dev"
+            DOCKER_IMAGE_NAMESPACE_PROD     = "${env.BRANCH_NAME}-prod"
+            DOCKER_IMAGE_APP_REPOSITORY     = "atsea-appserver"
+            DOCKER_IMAGE_DB_REPOSITORY      = "atsea-database"
+            DOCKER_REGISTRY_HOSTNAME        = "dtr.west.us.se.dckr.org"
+            DOCKER_REGISTRY_URI             = "https://${env.DOCKER_REGISTRY_HOSTNAME}"
+            DOCKER_REGISTRY_CREDENTIALS_ID  = jenkins
         }
     }
 
     stage('Clone') {
         /* Let's make sure we have the repository cloned to our workspace */
-
         checkout scm
     }
 
     stage('Build') {
         /* This builds the actual image; synonymous to
          * docker build on the command line */
-
         docker_app_image = docker.build("${env.DOCKER_IMAGE_NAMESPACE_DEV}/${env.DOCKER_IMAGE_APP_REPOSITORY}")
         docker_db_image = docker.build("${env.DOCKER_IMAGE_NAMESPACE_DEV}/${env.DOCKER_IMAGE_DB_REPOSITORY}")
     }
