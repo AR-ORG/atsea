@@ -49,27 +49,27 @@ node {
         * Second, the 'latest' tag.
         * Pushing multiple tags is cheap, as all the layers are reused. */
 
-        /* Get Token */
-        def token_response
-        def token_result
-        def token
-        withCredentials([usernamePassword(credentialsId: env.DOCKER_REGISTRY_CREDENTIALS_ID, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-            token_response = httpRequest acceptType: 'APPLICATION_JSON', contentType: 'APPLICATION_JSON', httpMode: 'POST', ignoreSslErrors: true, responseHandle: 'LEAVE_OPEN', url: "${env.DOCKER_UCP_URI}/auth/login", requestBody: "{  \"password\": \"${PASSWORD}\",  \"username\": \"${USERNAME}\"}"
-            println('Token response: ' + token_response)
-            token_result = readJSON text: token_response.content
-            println('Token result: ' + token_result)
-            token = token_result.auth_token
-            println('Token: ' + token)
-        }
+        // /* Get Token */
+        // def token_response
+        // def token_result
+        // def token
+        // withCredentials([usernamePassword(credentialsId: env.DOCKER_REGISTRY_CREDENTIALS_ID, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+        //     token_response = httpRequest acceptType: 'APPLICATION_JSON', contentType: 'APPLICATION_JSON', httpMode: 'POST', ignoreSslErrors: true, responseHandle: 'LEAVE_OPEN', url: "${env.DOCKER_UCP_URI}/auth/login", requestBody: "{  \"password\": \"${PASSWORD}\",  \"username\": \"${USERNAME}\"}"
+        //     println('Token response: ' + token_response)
+        //     token_result = readJSON text: token_response.content
+        //     println('Token result: ' + token_result)
+        //     token = token_result.auth_token
+        //     println('Token: ' + token)
+        // }
 
-        /* Create Organizations */
-        println( 'token authorization ' + ${token} )
-        httpRequest acceptType: 'APPLICATION_JSON', contentType: 'APPLICATION_JSON', httpMode: 'POST', ignoreSslErrors: true, responseHandle: 'NONE', url: "${env.DOCKER_UCP_URI}/accounts", requestBody: "{  \"fullName\": \"${env.DOCKER_IMAGE_NAMESPACE_DEV}\",  \"isOrg\": true,  \"name\": \"${env.DOCKER_IMAGE_NAMESPACE_DEV}\" }", customHeaders: [[name: 'Authorization', value: "Bearer ${token}"]]
-        httpRequest acceptType: 'APPLICATION_JSON', contentType: 'APPLICATION_JSON', httpMode: 'POST', ignoreSslErrors: true, responseHandle: 'NONE', url: "${env.DOCKER_UCP_URI}/accounts", requestBody: "{  \"fullName\": \"${env.DOCKER_IMAGE_NAMESPACE_PROD}\",  \"isOrg\": true,  \"name\": \"${env.DOCKER_IMAGE_NAMESPACE_PROD}\" }", customHeaders: [[name: 'Authorization', value: "Bearer ${token}"]]
+        // /* Create Organizations */
+        // println( 'token authorization ' + ${token} )
+        // httpRequest acceptType: 'APPLICATION_JSON', contentType: 'APPLICATION_JSON', httpMode: 'POST', ignoreSslErrors: true, responseHandle: 'NONE', url: "${env.DOCKER_UCP_URI}/accounts", requestBody: "{  \"fullName\": \"${env.DOCKER_IMAGE_NAMESPACE_DEV}\",  \"isOrg\": true,  \"name\": \"${env.DOCKER_IMAGE_NAMESPACE_DEV}\" }", customHeaders: [[name: 'Authorization', value: "Bearer ${token}"]]
+        // httpRequest acceptType: 'APPLICATION_JSON', contentType: 'APPLICATION_JSON', httpMode: 'POST', ignoreSslErrors: true, responseHandle: 'NONE', url: "${env.DOCKER_UCP_URI}/accounts", requestBody: "{  \"fullName\": \"${env.DOCKER_IMAGE_NAMESPACE_PROD}\",  \"isOrg\": true,  \"name\": \"${env.DOCKER_IMAGE_NAMESPACE_PROD}\" }", customHeaders: [[name: 'Authorization', value: "Bearer ${token}"]]
 
-        /* Create Repositories */
-        httpRequest acceptType: 'APPLICATION_JSON', authentication: env.DOCKER_REGISTRY_CREDENTIALS_ID, contentType: 'APPLICATION_JSON', httpMode: 'POST', ignoreSslErrors: true, responseHandle: 'NONE', url: "${env.DOCKER_REPOSITORY_URI}/api/v0/repositories/${env.DOCKER_IMAGE_NAMESPACE_DEV}", requestBody: "{ \"enableManifestLists\": true, \"immutableTags\": false, \"longDescription\": \"App Server for AtSea app\", \"name\": \"${env.DOCKER_IMAGE_APP_REPOSITORY}\", \"scanOnPush\": false, \"shortDescription\": \"App Server for AtSea app\", \"tagLimit\": 0, \"visibility\": \"public\"}"
-        httpRequest acceptType: 'APPLICATION_JSON', authentication: env.DOCKER_REGISTRY_CREDENTIALS_ID, contentType: 'APPLICATION_JSON', httpMode: 'POST', ignoreSslErrors: true, responseHandle: 'NONE', url: "${env.DOCKER_REPOSITORY_URI}/api/v0/repositories/${env.DOCKER_IMAGE_NAMESPACE_DEV}", requestBody: "{ \"enableManifestLists\": true, \"immutableTags\": false, \"longDescription\": \"Database Server for AtSea app\", \"name\": \"${env.DOCKER_IMAGE_DB_REPOSITORY}\", \"scanOnPush\": false, \"shortDescription\": \"Database Server for AtSea app\", \"tagLimit\": 0, \"visibility\": \"public\"}"
+        // /* Create Repositories */
+        // httpRequest acceptType: 'APPLICATION_JSON', authentication: env.DOCKER_REGISTRY_CREDENTIALS_ID, contentType: 'APPLICATION_JSON', httpMode: 'POST', ignoreSslErrors: true, responseHandle: 'NONE', url: "${env.DOCKER_REPOSITORY_URI}/api/v0/repositories/${env.DOCKER_IMAGE_NAMESPACE_DEV}", requestBody: "{ \"enableManifestLists\": true, \"immutableTags\": false, \"longDescription\": \"App Server for AtSea app\", \"name\": \"${env.DOCKER_IMAGE_APP_REPOSITORY}\", \"scanOnPush\": false, \"shortDescription\": \"App Server for AtSea app\", \"tagLimit\": 0, \"visibility\": \"public\"}"
+        // httpRequest acceptType: 'APPLICATION_JSON', authentication: env.DOCKER_REGISTRY_CREDENTIALS_ID, contentType: 'APPLICATION_JSON', httpMode: 'POST', ignoreSslErrors: true, responseHandle: 'NONE', url: "${env.DOCKER_REPOSITORY_URI}/api/v0/repositories/${env.DOCKER_IMAGE_NAMESPACE_DEV}", requestBody: "{ \"enableManifestLists\": true, \"immutableTags\": false, \"longDescription\": \"Database Server for AtSea app\", \"name\": \"${env.DOCKER_IMAGE_DB_REPOSITORY}\", \"scanOnPush\": false, \"shortDescription\": \"Database Server for AtSea app\", \"tagLimit\": 0, \"visibility\": \"public\"}"
 
         /* Push Docker images */
         docker.withRegistry(env.DOCKER_REGISTRY_URI, env.DOCKER_REGISTRY_CREDENTIALS_ID) {
