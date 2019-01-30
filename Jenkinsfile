@@ -11,9 +11,12 @@ node {
     env.DOCKER_IMAGE_DB_REPOSITORY      = "atsea-database"
     env.DOCKER_REGISTRY_HOSTNAME        = "dtr.west.us.se.dckr.org"
     env.DOCKER_REGISTRY_URI             = "https://${env.DOCKER_REGISTRY_HOSTNAME}"
-    env.DOCKER_UCP_HOSTNAME        = "ucp.west.us.se.dckr.org"
-    env.DOCKER_UCP_URI             = "https://${env.DOCKER_UCP_HOSTNAME}"
+    env.DOCKER_UCP_HOSTNAME             = "ucp.west.us.se.dckr.org"
+    env.DOCKER_UCP_URI                  = "https://${env.DOCKER_UCP_HOSTNAME}"
     env.DOCKER_REGISTRY_CREDENTIALS_ID  = "jenkins"
+
+    ROOT_SIGNING_PASSPHRASE             = "docker123"
+    REPOSITORY_SIGNING_PASSPHRASE       = "docker123"
 
     stage('Clone') {
         /* Let's make sure we have the repository cloned to our workspace */
@@ -41,6 +44,27 @@ node {
         docker_db_image.inside {
             sh 'echo "DB Tests passed"'
         }
+    }
+
+    stage('Signing & Pushing') {
+        withCredentials([dockerCert(credentialsId: 'ucp_certificates', variable: 'DOCKER_CERT_PATH')]) {
+            withCredentials([usernamePassword(credentialsId: env.DOCKER_REGISTRY_CREDENTIALS_ID, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                withEnv(["DOCKER_CONTENT_TRUST=1",
+                         "DOCKER_CONTENT_TRUST_ROOT_PASSPHRASE=$ROOT_SIGNING_PASSPHRASE",
+                         "DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE=$REPOSITORY_SIGNING_PASSPHRASE"]) {
+                    dir("${DOCKER_CERT_PATH}") {
+                        sh """"
+                            docker login ${env.DOCKER_REGISTRY_HOSTNAME} -u ${USERNAME} -p ${PASSWORD}
+                            docker trust signer add --key cert.pem ${USERNAME} ${env.DOCKER_IMAGE_NAMESPACE_DEV}/${env.DOCKER_IMAGE_DB_REPOSITORY}
+                            docker trust key load key.pem
+                            docker tag ${docker_app_image.id} ${env.DOCKER_IMAGE_NAMESPACE_DEV}/${env.DOCKER_IMAGE_APP_REPOSITORY}:${DOCKER_IMAGE_TAG}
+                            docker push ${env.DOCKER_IMAGE_NAMESPACE_DEV}/${env.DOCKER_IMAGE_APP_REPOSITORY}:${DOCKER_IMAGE_TAG}
+                            docker trust inspect --pretty ${env.DOCKER_IMAGE_NAMESPACE_DEV}/${env.DOCKER_IMAGE_APP_REPOSITORY}:${DOCKER_IMAGE_TAG}
+                        """
+                    }
+                }
+            }
+       }
     }
 
     stage('Push') {
@@ -72,16 +96,19 @@ node {
         // httpRequest acceptType: 'APPLICATION_JSON', authentication: env.DOCKER_REGISTRY_CREDENTIALS_ID, contentType: 'APPLICATION_JSON', httpMode: 'POST', ignoreSslErrors: true, responseHandle: 'NONE', url: "${env.DOCKER_REPOSITORY_URI}/api/v0/repositories/${env.DOCKER_IMAGE_NAMESPACE_DEV}", requestBody: "{ \"enableManifestLists\": true, \"immutableTags\": false, \"longDescription\": \"Database Server for AtSea app\", \"name\": \"${env.DOCKER_IMAGE_DB_REPOSITORY}\", \"scanOnPush\": false, \"shortDescription\": \"Database Server for AtSea app\", \"tagLimit\": 0, \"visibility\": \"public\"}"
 
         /* Push Docker images */
-        docker.withRegistry(env.DOCKER_REGISTRY_URI, env.DOCKER_REGISTRY_CREDENTIALS_ID) {
-            docker_app_image.push(DOCKER_IMAGE_TAG)
-            docker_db_image.push(DOCKER_IMAGE_TAG)
-        }
+        // docker.withRegistry(env.DOCKER_REGISTRY_URI, env.DOCKER_REGISTRY_CREDENTIALS_ID) {
+        //     docker_app_image.push(DOCKER_IMAGE_TAG)
+        //     docker_db_image.push(DOCKER_IMAGE_TAG)
+        // }
     }
 
     stage('Scan') {
         /* App Image Scanning */
         httpRequest acceptType: 'APPLICATION_JSON', authentication: env.DOCKER_REGISTRY_CREDENTIALS_ID, contentType: 'APPLICATION_JSON', httpMode: 'POST', ignoreSslErrors: true, responseHandle: 'NONE', url: "${env.DOCKER_REGISTRY_URI}/api/v0/imagescan/scan/${env.DOCKER_IMAGE_NAMESPACE_DEV}/${env.DOCKER_IMAGE_APP_REPOSITORY}/${DOCKER_IMAGE_TAG}/linux/amd64"
+        /* DB Image Scanning */
+        httpRequest acceptType: 'APPLICATION_JSON', authentication: env.DOCKER_REGISTRY_CREDENTIALS_ID, contentType: 'APPLICATION_JSON', httpMode: 'POST', ignoreSslErrors: true, responseHandle: 'NONE', url: "${env.DOCKER_REGISTRY_URI}/api/v0/imagescan/scan/${env.DOCKER_IMAGE_NAMESPACE_DEV}/${env.DOCKER_IMAGE_DB_REPOSITORY}/${DOCKER_IMAGE_TAG}/linux/amd64"
 
+        /* App Image Scanning check */
         def scan_result
 
         def scanning = true
@@ -105,7 +132,7 @@ node {
         }
         println('App Response JSON: ' + scan_result)
 
-        /* DB Image Scanning */
+        /* DB Image Scanning Check */
         httpRequest acceptType: 'APPLICATION_JSON', authentication: env.DOCKER_REGISTRY_CREDENTIALS_ID, contentType: 'APPLICATION_JSON', httpMode: 'POST', ignoreSslErrors: true, responseHandle: 'NONE', url: "${env.DOCKER_REGISTRY_URI}/api/v0/imagescan/scan/${env.DOCKER_IMAGE_NAMESPACE_DEV}/${env.DOCKER_IMAGE_DB_REPOSITORY}/${DOCKER_IMAGE_TAG}/linux/amd64"
 
         scanning = true
@@ -134,6 +161,8 @@ node {
         httpRequest acceptType: 'APPLICATION_JSON', authentication: env.DOCKER_REGISTRY_CREDENTIALS_ID, contentType: 'APPLICATION_JSON', httpMode: 'POST', ignoreSslErrors: true, requestBody: "{\"targetRepository\": \"${env.DOCKER_IMAGE_NAMESPACE_PROD}/${env.DOCKER_IMAGE_APP_REPOSITORY}\", \"targetTag\": \"${DOCKER_IMAGE_TAG}\"}", responseHandle: 'NONE', url: "${env.DOCKER_REGISTRY_URI}/api/v0/repositories/${env.DOCKER_IMAGE_NAMESPACE_DEV}/${env.DOCKER_IMAGE_APP_REPOSITORY}/tags/${DOCKER_IMAGE_TAG}/promotion"
         httpRequest acceptType: 'APPLICATION_JSON', authentication: env.DOCKER_REGISTRY_CREDENTIALS_ID, contentType: 'APPLICATION_JSON', httpMode: 'POST', ignoreSslErrors: true, requestBody: "{\"targetRepository\": \"${env.DOCKER_IMAGE_NAMESPACE_PROD}/${env.DOCKER_IMAGE_DB_REPOSITORY}\", \"targetTag\": \"${DOCKER_IMAGE_TAG}\"}", responseHandle: 'NONE', url: "${env.DOCKER_REGISTRY_URI}/api/v0/repositories/${env.DOCKER_IMAGE_NAMESPACE_DEV}/${env.DOCKER_IMAGE_DB_REPOSITORY}/tags/${DOCKER_IMAGE_TAG}/promotion"
     }
+
+
 
     // stage('Deploy') {
     //     withDockerServer([credentialsId: env.DOCKER_UCP_CREDENTIALS_ID, uri: env.DOCKER_UCP_URI]) {
