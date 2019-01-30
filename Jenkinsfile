@@ -5,15 +5,13 @@ DOCKER_IMAGE_TAG = "${env.BUILD_TIMESTAMP}"
 node {
     def docker_image
 
-    environment {
-        DOCKER_IMAGE_NAMESPACE_DEV      = "${env.BRANCH_NAME}-dev"
-        DOCKER_IMAGE_NAMESPACE_PROD     = "${env.BRANCH_NAME}-prod"
-        DOCKER_IMAGE_APP_REPOSITORY     = "atsea-appserver"
-        DOCKER_IMAGE_DB_REPOSITORY      = "atsea-database"
-        DOCKER_REGISTRY_HOSTNAME        = "dtr.west.us.se.dckr.org"
-        DOCKER_REGISTRY_URI             = "https://${env.DOCKER_REGISTRY_HOSTNAME}"
-        DOCKER_REGISTRY_CREDENTIALS_ID  = jenkins
-    }
+    env.DOCKER_IMAGE_NAMESPACE_DEV      = "${env.BRANCH_NAME}-dev"
+    env.DOCKER_IMAGE_NAMESPACE_PROD     = "${env.BRANCH_NAME}-prod"
+    env.DOCKER_IMAGE_APP_REPOSITORY     = "atsea-appserver"
+    env.DOCKER_IMAGE_DB_REPOSITORY      = "atsea-database"
+    env.DOCKER_REGISTRY_HOSTNAME        = "dtr.west.us.se.dckr.org"
+    env.DOCKER_REGISTRY_URI             = "https://${env.DOCKER_REGISTRY_HOSTNAME}"
+    env.DOCKER_REGISTRY_CREDENTIALS_ID  = "jenkins"
 
     stage('Clone') {
         /* Let's make sure we have the repository cloned to our workspace */
@@ -113,5 +111,5 @@ node {
     //         sh "docker service update --image ${env.DOCKER_REGISTRY_HOSTNAME}/${env.DOCKER_IMAGE_NAMESPACE_PROD}/${env.DOCKER_IMAGE_REPOSITORY}:${DOCKER_IMAGE_TAG} ${env.DOCKER_SERVICE_NAME}" 
     //     }
     // }
-    
+
 }
