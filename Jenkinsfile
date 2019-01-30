@@ -50,16 +50,19 @@ node {
         * Pushing multiple tags is cheap, as all the layers are reused. */
 
         /* Get Token */
+        def token_response
+        def token_result
+        def token
         withCredentials([usernamePassword(credentialsId: env.DOCKER_REGISTRY_CREDENTIALS_ID, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-            def token_response = httpRequest acceptType: 'APPLICATION_JSON', contentType: 'APPLICATION_JSON', httpMode: 'POST', ignoreSslErrors: true, responseHandle: 'LEAVE_OPEN', url: "${env.DOCKER_UCP_URI}/auth/login", requestBody: "{  \"password\": \"${PASSWORD}\",  \"username\": \"${USERNAME}\"}"
-            def token_result = readJSON text: token_response.content
-            def token = token_result.auth_token
+            token_response = httpRequest acceptType: 'APPLICATION_JSON', contentType: 'APPLICATION_JSON', httpMode: 'POST', ignoreSslErrors: true, responseHandle: 'LEAVE_OPEN', url: "${env.DOCKER_UCP_URI}/auth/login", requestBody: "{  \"password\": \"${PASSWORD}\",  \"username\": \"${USERNAME}\"}"
+            println('Token response: ' + token_response)
+            token_result = readJSON text: token_response.content
+            println('Token result: ' + token_result)
+            token = token_result.auth_token
+            println('Token: ' + token)
         }
 
         /* Create Organizations */
-        println('Token response: ' + token_response)
-        println('Token result: ' + token_result)
-        println('Token: ' + token)
         httpRequest acceptType: 'APPLICATION_JSON', contentType: 'APPLICATION_JSON', httpMode: 'POST', ignoreSslErrors: true, responseHandle: 'NONE', url: "${env.DOCKER_UCP_URI}/accounts", requestBody: "{  \"fullName\": \"${env.DOCKER_IMAGE_NAMESPACE_DEV}\",  \"isOrg\": true,  \"name\": \"${env.DOCKER_IMAGE_NAMESPACE_DEV}\" }", customHeaders: [[name: 'Authorization', value: "Bearer ${token}"]]
         httpRequest acceptType: 'APPLICATION_JSON', contentType: 'APPLICATION_JSON', httpMode: 'POST', ignoreSslErrors: true, responseHandle: 'NONE', url: "${env.DOCKER_UCP_URI}/accounts", requestBody: "{  \"fullName\": \"${env.DOCKER_IMAGE_NAMESPACE_PROD}\",  \"isOrg\": true,  \"name\": \"${env.DOCKER_IMAGE_NAMESPACE_PROD}\" }", customHeaders: [[name: 'Authorization', value: "Bearer ${token}"]]
 
