@@ -56,11 +56,20 @@ node {
                     dir("${DOCKER_CERT_PATH}") {
                         sh """
                             docker login ${env.DOCKER_REGISTRY_HOSTNAME} -u ${USERNAME} -p ${PASSWORD}
-                            docker trust signer add --key cert.pem ${USERNAME} ${env.DOCKER_REGISTRY_HOSTNAME}/${env.DOCKER_IMAGE_NAMESPACE_DEV}/${env.DOCKER_IMAGE_DB_REPOSITORY}
+
+                            echo "Signing and pushing AtSea App Server Docker image"
+                            # docker trust signer add --key cert.pem ${USERNAME} ${env.DOCKER_REGISTRY_HOSTNAME}/${env.DOCKER_IMAGE_NAMESPACE_DEV}/${env.DOCKER_IMAGE_APP_REPOSITORY}
                             docker trust key load key.pem
                             docker tag ${docker_app_image.id} ${env.DOCKER_REGISTRY_HOSTNAME}/${env.DOCKER_IMAGE_NAMESPACE_DEV}/${env.DOCKER_IMAGE_APP_REPOSITORY}:${DOCKER_IMAGE_TAG}
                             docker push ${env.DOCKER_REGISTRY_HOSTNAME}/${env.DOCKER_IMAGE_NAMESPACE_DEV}/${env.DOCKER_IMAGE_APP_REPOSITORY}:${DOCKER_IMAGE_TAG}
                             docker trust inspect --pretty ${env.DOCKER_REGISTRY_HOSTNAME}/${env.DOCKER_IMAGE_NAMESPACE_DEV}/${env.DOCKER_IMAGE_APP_REPOSITORY}:${DOCKER_IMAGE_TAG}
+
+                            echo "Signing and pushing AtSea Database Server Docker image"
+                            # docker trust signer add --key cert.pem ${USERNAME} ${env.DOCKER_REGISTRY_HOSTNAME}/${env.DOCKER_IMAGE_NAMESPACE_DEV}/${env.DOCKER_IMAGE_DB_REPOSITORY}
+                            docker trust key load key.pem
+                            docker tag ${docker_db_image.id} ${env.DOCKER_REGISTRY_HOSTNAME}/${env.DOCKER_IMAGE_NAMESPACE_DEV}/${env.DOCKER_IMAGE_DB_REPOSITORY}:${DOCKER_IMAGE_TAG}
+                            docker push ${env.DOCKER_REGISTRY_HOSTNAME}/${env.DOCKER_IMAGE_NAMESPACE_DEV}/${env.DOCKER_IMAGE_DB_REPOSITORY}:${DOCKER_IMAGE_TAG}
+                            docker trust inspect --pretty ${env.DOCKER_REGISTRY_HOSTNAME}/${env.DOCKER_IMAGE_NAMESPACE_DEV}/${env.DOCKER_IMAGE_DB_REPOSITORY}:${DOCKER_IMAGE_TAG}
                         """
                     }
                 }
