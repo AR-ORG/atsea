@@ -56,7 +56,7 @@ node {
                     dir("${DOCKER_CERT_PATH}") {
                         sh """
                             docker login ${env.DOCKER_REGISTRY_HOSTNAME} -u ${USERNAME} -p ${PASSWORD}
-                            docker trust signer add --key cert.pem ${USERNAME} ${env.DOCKER_IMAGE_NAMESPACE_DEV}/${env.DOCKER_IMAGE_DB_REPOSITORY}
+                            docker trust signer add --key cert.pem ${USERNAME} ${env.DOCKER_REGISTRY_HOSTNAME}/${env.DOCKER_IMAGE_NAMESPACE_DEV}/${env.DOCKER_IMAGE_DB_REPOSITORY}
                             docker trust key load key.pem
                             docker tag ${docker_app_image.id} ${env.DOCKER_IMAGE_NAMESPACE_DEV}/${env.DOCKER_IMAGE_APP_REPOSITORY}:${DOCKER_IMAGE_TAG}
                             docker push ${env.DOCKER_IMAGE_NAMESPACE_DEV}/${env.DOCKER_IMAGE_APP_REPOSITORY}:${DOCKER_IMAGE_TAG}
