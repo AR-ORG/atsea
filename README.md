@@ -39,6 +39,17 @@ docker stack deploy -c docker-stack.yml atsea
 
 The URL for the content is `http://localhost:8080/`
 
+
+## Run on Kubernetes on Docker Desktop Enterprise
+
+To run the AtSea shop as an application:
+```
+kubectl apply -f test.yaml
+```
+
+The URL for the content is `http://localhost:30080/`
+
+
 # REST API
 
 Documentation for REST calls: [REST API](./REST.md)
