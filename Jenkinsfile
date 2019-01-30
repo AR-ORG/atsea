@@ -14,6 +14,7 @@ node {
     env.DOCKER_UCP_HOSTNAME             = "ucp.west.us.se.dckr.org"
     env.DOCKER_UCP_URI                  = "https://${env.DOCKER_UCP_HOSTNAME}"
     env.DOCKER_REGISTRY_CREDENTIALS_ID  = "jenkins"
+    env.DOCKER_UCP_CREDENTIALS_ID       = "jenkins_certificates"
 
     ROOT_SIGNING_PASSPHRASE             = "docker123"
     REPOSITORY_SIGNING_PASSPHRASE       = "docker123"
@@ -47,7 +48,7 @@ node {
     }
 
     stage('Signing & Pushing') {
-        withCredentials([dockerCert(credentialsId: 'ucp_certificates', variable: 'DOCKER_CERT_PATH')]) {
+        withCredentials([dockerCert(credentialsId: env.DOCKER_UCP_CREDENTIALS_ID, variable: 'DOCKER_CERT_PATH')]) {
             withCredentials([usernamePassword(credentialsId: env.DOCKER_REGISTRY_CREDENTIALS_ID, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                 withEnv(["DOCKER_CONTENT_TRUST=1",
                          "DOCKER_CONTENT_TRUST_ROOT_PASSPHRASE=$ROOT_SIGNING_PASSPHRASE",
