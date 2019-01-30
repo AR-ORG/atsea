@@ -54,7 +54,7 @@ node {
                          "DOCKER_CONTENT_TRUST_ROOT_PASSPHRASE=$ROOT_SIGNING_PASSPHRASE",
                          "DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE=$REPOSITORY_SIGNING_PASSPHRASE"]) {
                     dir("${DOCKER_CERT_PATH}") {
-                        sh """"
+                        sh """
                             docker login ${env.DOCKER_REGISTRY_HOSTNAME} -u ${USERNAME} -p ${PASSWORD}
                             docker trust signer add --key cert.pem ${USERNAME} ${env.DOCKER_IMAGE_NAMESPACE_DEV}/${env.DOCKER_IMAGE_DB_REPOSITORY}
                             docker trust key load key.pem
