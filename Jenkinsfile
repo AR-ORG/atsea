@@ -50,7 +50,7 @@ node {
         * Pushing multiple tags is cheap, as all the layers are reused. */
 
         /* Get Token */
-        withCredentials([usernamePassword(credentialsId: '<CREDENTIAL_ID>', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+        withCredentials([usernamePassword(credentialsId: env.DOCKER_REGISTRY_CREDENTIALS_ID, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
             def token_response = httpRequest acceptType: 'APPLICATION_JSON', contentType: 'APPLICATION_JSON', httpMode: 'POST', ignoreSslErrors: true, responseHandle: 'NONE', url: "${env.DOCKER_UCP_URI}/auth/login", requestBody: "{  \"password\": \"${PASSWORD}\",  \"username\": \"${USERNAME}\"}"
             def token_result = readJSON text: token_response.content
             def token = token_result.auth_token
