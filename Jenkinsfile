@@ -63,6 +63,7 @@ node {
         }
 
         /* Create Organizations */
+        println( 'token authorization ' + ${token} )
         httpRequest acceptType: 'APPLICATION_JSON', contentType: 'APPLICATION_JSON', httpMode: 'POST', ignoreSslErrors: true, responseHandle: 'NONE', url: "${env.DOCKER_UCP_URI}/accounts", requestBody: "{  \"fullName\": \"${env.DOCKER_IMAGE_NAMESPACE_DEV}\",  \"isOrg\": true,  \"name\": \"${env.DOCKER_IMAGE_NAMESPACE_DEV}\" }", customHeaders: [[name: 'Authorization', value: "Bearer ${token}"]]
         httpRequest acceptType: 'APPLICATION_JSON', contentType: 'APPLICATION_JSON', httpMode: 'POST', ignoreSslErrors: true, responseHandle: 'NONE', url: "${env.DOCKER_UCP_URI}/accounts", requestBody: "{  \"fullName\": \"${env.DOCKER_IMAGE_NAMESPACE_PROD}\",  \"isOrg\": true,  \"name\": \"${env.DOCKER_IMAGE_NAMESPACE_PROD}\" }", customHeaders: [[name: 'Authorization', value: "Bearer ${token}"]]
 
