@@ -57,6 +57,6 @@ public class CustomerServiceImpl implements CustomerService {
 	}
 
 	public void deleteCustomerById(Long customerId) {
-		customerRepository.delete(customerId);		
+		customerRepository.delete(customerRepository.getOne(customerId));
 	}
 }
