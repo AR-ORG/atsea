@@ -76,6 +76,8 @@ spec:
           value: /run/secrets/postgres-password/postgres_password
         - name: POSTGRES_USER
           value: gordonuser
+        - name: PGDATA
+          value: /var/lib/postgresql/data/atseadata
         image: dockersamples/atsea_db
         imagePullPolicy: IfNotPresent
         name: database
@@ -86,6 +88,9 @@ spec:
         - mountPath: /run/secrets/postgres-password
           name: secret-0
           readOnly: true
+        - name: atsea-db-pv-data
+          mountPath: /var/lib/postgresql/data
+          subPath: atseadata
       restartPolicy: Always
       volumes:
       - name: secret-0
@@ -95,6 +100,9 @@ spec:
           # - key: C:\demo\atsea\devsecrets\postgres_password
           #   path: secret-0
           secretName: postgres-password
+      - name: atsea-db-pv-data
+        persistentVolumeClaim:
+          claimName: atsea-db-pv-claim
 ---
 apiVersion: v1
 kind: Service
@@ -150,3 +158,17 @@ spec:
         path: /
 status:
   loadBalancer: {}
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: atsea-db-pv-claim
+  annotations:
+    volume.beta.kubernetes.io/storage-class: efs
+spec:
+  storageClassName: efs
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Mi
