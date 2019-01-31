@@ -21,6 +21,7 @@ spec:
         com.docker.service.id: atsea-appserver
         com.docker.service.name: appserver
         com.docker.stack.namespace: atsea
+    revisionHistoryLimit: 1
     strategy:
       rollingUpdate:
         maxSurge: 1
