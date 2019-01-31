@@ -25,8 +25,8 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-core</artifactId>
-    <version>5.1.4.RELEASE</version>
-</dependency>
+      <version>5.1.4.RELEASE</version>
+    </dependency>
     <!-- Add freemarker template support -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -60,25 +60,25 @@
 		<version>5.4.1.Final</version>
 	</dependency>
     <!-- Add MySQL database support -->
-	<dependency>
+	<!-- <dependency>
 		<groupId>mysql</groupId>
 		<artifactId>mysql-connector-java</artifactId>
-	</dependency>
+	</dependency> -->
 	<!-- Add MS SQLServer database support -->
-	<dependency>
+	<!-- <dependency>
     	<groupId>com.microsoft.sqlserver</groupId>
     	<artifactId>mssql-jdbc</artifactId>
     	<version>7.0.0.jre8</version>
-	</dependency>
+	</dependency> -->
 	<!--  Add Jdbc Template support -->    
-	<dependency>
+	<!-- <dependency>
     	<groupId>org.springframework.boot</groupId>
     	<artifactId>spring-boot-starter-jdbc</artifactId>
-	</dependency>
-	<dependency>
+	</dependency> -->
+	<!-- <dependency>
     	<groupId>org.springframework</groupId>
         <artifactId>spring-jdbc</artifactId>
-        </dependency>
+        </dependency> -->
     <dependency>
       <groupId>com.googlecode.json-simple</groupId>
       <artifactId>json-simple</artifactId>
