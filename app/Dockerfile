@@ -1,17 +1,17 @@
-FROM node:latest AS storefront
+FROM dtr.west.us.se.dckr.org/official/node:latest AS storefront
 WORKDIR /usr/src/atsea/app/react-app
 COPY react-app .
 RUN npm install
 RUN npm run build
 
-FROM maven:latest AS appserver
+FROM dtr.west.us.se.dckr.org/official/maven:latest AS appserver
 WORKDIR /usr/src/atsea
 COPY pom.xml .
 RUN mvn -B -f pom.xml -s /usr/share/maven/ref/settings-docker.xml dependency:resolve
 COPY . .
 RUN mvn -B -s /usr/share/maven/ref/settings-docker.xml package -DskipTests
 
-FROM openjdk:13-alpine
+FROM dtr.west.us.se.dckr.org/official/openjdk:13-alpine
 RUN adduser -Dh /home/gordon gordon
 WORKDIR /static
 COPY --from=storefront /usr/src/atsea/app/react-app/build/ .
