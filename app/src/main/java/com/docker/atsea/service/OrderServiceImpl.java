@@ -18,7 +18,7 @@ public class OrderServiceImpl implements OrderService {
 	private OrderRepository orderRepository;
 		
 	public Order findById(Long orderId) {
-		return orderRepository.findOne(orderId) ;
+		return orderRepository.getOne(orderId) ;
 	}
 
 	public Order createOrder(Order order) {		
@@ -36,7 +36,7 @@ public class OrderServiceImpl implements OrderService {
 	}
 
 	public void deleteOrderById(Long orderId) {
-		orderRepository.delete(orderId);
+		orderRepository.delete(orderRepository.getOne(orderId));
 	}
 
 	public void deleteAllItems() {
