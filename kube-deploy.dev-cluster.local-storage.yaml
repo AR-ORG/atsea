@@ -37,6 +37,13 @@ spec:
         containers:
         - image: dtr.west.us.se.dckr.org/derrick.miller-dev/atsea-appserver:demo-vulnerable
           name: appserver
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "250m"
+            limits:
+              memory: "3Gi"
+              cpu: "500m"
           imagePullPolicy: IfNotPresent
           ports:
           - containerPort: 8080
@@ -81,6 +88,13 @@ spec:
         image: dtr.west.us.se.dckr.org/derrick.miller-dev/atsea-database:demo-v1
         imagePullPolicy: IfNotPresent
         name: database
+        resources:
+            requests:
+              memory: "2Gi"
+              cpu: "250m"
+            limits:
+              memory: "3Gi"
+              cpu: "500m"
         ports:
         - containerPort: 5432
           protocol: TCP
@@ -143,7 +157,7 @@ metadata:
   name: atsea-ingress
 spec:
   rules:
-  - host: atsea-dev.kube.west.us.se.dckr.org
+  - host: atsea-dev-nico.kube.west.us.se.dckr.org
     http:
       paths:
       - backend:
