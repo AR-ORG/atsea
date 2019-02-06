@@ -18,9 +18,9 @@ node {
     ROOT_SIGNING_PASSPHRASE             = "docker123"
     REPOSITORY_SIGNING_PASSPHRASE       = "docker123"
 
-    SERVICES.each { item ->
-        env.DOCKER_IMAGE_REPOSITORIES[${item}] = ${env.DOCKER_IMAGE_REPOSITORY_PREFIX}+"-"+${item}
-    }
+    // SERVICES.each { item ->
+    //     env.DOCKER_IMAGE_REPOSITORIES[${item}] = ${env.DOCKER_IMAGE_REPOSITORY_PREFIX}+"-"+${item}
+    // }
 
     // stage('Clone') {
     //     /* Let's make sure we have the repository cloned to our workspace */
