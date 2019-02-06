@@ -22,31 +22,31 @@ node {
         env.DOCKER_IMAGE_REPOSITORIES[${item}] = ${env.DOCKER_IMAGE_REPOSITORY_PREFIX}+"-"+${item}
     }
 
-    stage('Clone') {
-        /* Let's make sure we have the repository cloned to our workspace */
-        checkout scm
-    }
+    // stage('Clone') {
+    //     /* Let's make sure we have the repository cloned to our workspace */
+    //     checkout scm
+    // }
 
-    stage('Build') {
-        /* This builds the actual image; synonymous to
-        * docker build on the command line */
-        SERVICES.each { item ->
-            dir (${item}) {
-                docker_images[${item}] = docker.build("${env.DOCKER_IMAGE_NAMESPACE_DEV}/${env.DOCKER_IMAGE_REPOSITORIES[${item}]}")
-            }
-        }
-    }
+    // stage('Build') {
+    //     /* This builds the actual image; synonymous to
+    //     * docker build on the command line */
+    //     SERVICES.each { item ->
+    //         dir (${item}) {
+    //             docker_images[${item}] = docker.build("${env.DOCKER_IMAGE_NAMESPACE_DEV}/${env.DOCKER_IMAGE_REPOSITORIES[${item}]}")
+    //         }
+    //     }
+    // }
 
-    stage('Test') {
-        /* Ideally, we would run a test framework against our image.
-        * For this example, we're using a Volkswagen-type approach ;-) */
+    // stage('Test') {
+    //     /* Ideally, we would run a test framework against our image.
+    //     * For this example, we're using a Volkswagen-type approach ;-) */
 
-        SERVICES.each { item ->
-            docker_images[${item}].inside {
-                sh 'echo "App Tests passed"'
-            }
-        }
-    }
+    //     SERVICES.each { item ->
+    //         docker_images[${item}].inside {
+    //             sh 'echo "App Tests passed"'
+    //         }
+    //     }
+    // }
 
     // stage('Signing & Pushing') {
     //     withCredentials([dockerCert(credentialsId: env.DOCKER_UCP_CREDENTIALS_ID, variable: 'DOCKER_CERT_PATH')]) {
