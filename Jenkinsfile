@@ -19,7 +19,7 @@ node {
     REPOSITORY_SIGNING_PASSPHRASE       = "docker123"
 
     SERVICES.each { item ->
-        echo "Hello ${env.DOCKER_IMAGE_REPOSITORY_PREFIX}-${item}"
+        DOCKER_IMAGE_REPOSITORIES["${item}"]="${env.DOCKER_IMAGE_REPOSITORY_PREFIX}-${item}"
     }
 
     // stage('Clone') {
@@ -32,7 +32,7 @@ node {
     //     * docker build on the command line */
     //     SERVICES.each { item ->
     //         dir (${item}) {
-    //             docker_images[${item}] = docker.build("${env.DOCKER_IMAGE_NAMESPACE_DEV}/${env.DOCKER_IMAGE_REPOSITORIES[${item}]}")
+    //             docker_images[${item}] = docker.build("${env.DOCKER_IMAGE_NAMESPACE_DEV}/${DOCKER_IMAGE_REPOSITORIES[${item}]}")
     //         }
     //     }
     // }
