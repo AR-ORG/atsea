@@ -3,7 +3,7 @@ version: "3.7"
 services:
   database:
     build: 
-       context: db
+       context: 03_database
     image: atsea_db
     user: postgres
     environment:
@@ -19,7 +19,7 @@ services:
 
   api:
     build:
-       context: api
+       context: 02_api
        dockerfile: Dockerfile
     image: atsea_api
     user: gordon
@@ -33,18 +33,31 @@ services:
 
   web:
     build:
-       context: web
+       context: 01_web
        dockerfile: Dockerfile
     image: atsea_web
+    user: gordon
     ports:
-      - "5000:5000" 
+      - "3000:3000" 
     networks:
       - front-tier
+
+  payment-gateway:
+    build:
+      context: payment_gateway
+    networks:
+      - payment
+    secrets:
+      - payment-token
 
 networks:
   front-tier:
   back-tier:
+  payment:
+    driver: overlay
 
 secrets:
   postgres-password:
     file: ./devsecrets/postgres_password
+  payment-token:
+    file: ./devsecrets/payment_token

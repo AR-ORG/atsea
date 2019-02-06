@@ -9,34 +9,64 @@ stringData:
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: appserver
+  name: web
   namespace: default
   labels:
-    com.docker.service.id: atsea-appserver
-    com.docker.service.name: appserver
+    com.docker.service.id: atsea-web
+    com.docker.service.name: web
     com.docker.stack.namespace: atsea
 spec:
     replicas: 1
     selector:
       matchLabels:
-        com.docker.service.id: atsea-appserver
-        com.docker.service.name: appserver
+        com.docker.service.id: atsea-web
+        com.docker.service.name: web
         com.docker.stack.namespace: atsea
     template:
       metadata:
         labels:
-          com.docker.service.id: atsea-appserver
-          com.docker.service.name: appserver
+          com.docker.service.id: atsea-web
+          com.docker.service.name: web
           com.docker.stack.namespace: atsea          
       spec:
         containers:
-        - image: atsea_app
-          name: appserver
+        - image: atsea_web
+          name: web
+          imagePullPolicy: Never
+          ports:
+          - containerPort: 5000
+            protocol: TCP
+        restartPolicy: Always
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: apiVersion
+  namespace: default
+  labels:
+    com.docker.service.id: atsea-api
+    com.docker.service.name: api
+    com.docker.stack.namespace: atsea
+spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        com.docker.service.id: atsea-api
+        com.docker.service.name: api
+        com.docker.stack.namespace: atsea
+    template:
+      metadata:
+        labels:
+          com.docker.service.id: atsea-api
+          com.docker.service.name: api
+          com.docker.stack.namespace: atsea          
+      spec:
+        containers:
+        - image: atsea_api
+          name: api
           imagePullPolicy: Never
           ports:
           - containerPort: 8080
-            protocol: TCP
-          - containerPort: 5005
             protocol: TCP
         restartPolicy: Always
 ---
@@ -44,23 +74,23 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   labels:
-    com.docker.service.id: atsea-database
-    com.docker.service.name: database
+    com.docker.service.id: atsea-db
+    com.docker.service.name: db
     com.docker.stack.namespace: atsea
-  name: database
+  name: db
   namespace: default
 spec:
   replicas: 1
   selector:
     matchLabels:
-      com.docker.service.id: atsea-database
-      com.docker.service.name: database
+      com.docker.service.id: atsea-db
+      com.docker.service.name: db
       com.docker.stack.namespace: atsea
   template:
     metadata:
       labels:
-        com.docker.service.id: atsea-database
-        com.docker.service.name: database
+        com.docker.service.id: atsea-db
+        com.docker.service.name: db
         com.docker.stack.namespace: atsea
     spec:
       containers:
@@ -96,10 +126,10 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    com.docker.service.id: atsea-database
-    com.docker.service.name: database
+    com.docker.service.id: atsea-db
+    com.docker.service.name: db
     com.docker.stack.namespace: atsea
-  name: database
+  name: db
   namespace: default
 spec:
   ports:
@@ -107,27 +137,46 @@ spec:
     protocol: TCP
     targetPort: 5432
   selector:
-    com.docker.service.id: atsea-database
-    com.docker.service.name: database
+    com.docker.service.id: atsea-db
+    com.docker.service.name: db
     com.docker.stack.namespace: atsea
 ---
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    com.docker.service.id: atsea-appserver
-    com.docker.service.name: appserver
+    com.docker.service.id: atsea-api
+    com.docker.service.name: api
     com.docker.stack.namespace: atsea
-  name: appserver
+  name: api
   namespace: default
 spec:
   ports:
   - port: 8080
     protocol: TCP
     targetPort: 8080
+  selector:
+    com.docker.service.id: atsea-api
+    com.docker.service.name: api
+    com.docker.stack.namespace: atsea
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    com.docker.service.id: atsea-web
+    com.docker.service.name: web
+    com.docker.stack.namespace: atsea
+  name: web
+  namespace: default
+spec:
+  ports:
+  - port: 5000
+    protocol: TCP
+    targetPort: 5000
     nodePort: 30080
   selector:
-    com.docker.service.id: atsea-appserver
-    com.docker.service.name: appserver
+    com.docker.service.id: atsea-web
+    com.docker.service.name: web
     com.docker.stack.namespace: atsea
   type: NodePort
