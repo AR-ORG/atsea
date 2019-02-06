@@ -19,7 +19,7 @@ node {
     REPOSITORY_SIGNING_PASSPHRASE       = "docker123"
 
     SERVICES.each { item ->
-        DOCKER_IMAGE_REPOSITORIES["${item}"]="${env.DOCKER_IMAGE_REPOSITORY_PREFIX}-${item}"
+        env.DOCKER_IMAGE_REPOSITORIES["${item}"]="${env.DOCKER_IMAGE_REPOSITORY_PREFIX}-${item}"
     }
 
     // stage('Clone') {
